@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+{% block content %}
+<script>
+
+    function change_status(usn, round_id, status) {
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            //l = document.getElementById("load_" + usn + round_id);
+            pass = document.getElementById("pass_" + usn + round_id);
+            fail = document.getElementById("fail_" + usn + round_id);
+            na = document.getElementById("not_attended_" + usn + round_id);
+            count = parseInt(document.getElementById(round_id + "_passed_count").innerHTML);
+            if (this.readyState == 1) {
+                //l.innerHTML = "<div class='ml-3 spinner-border text-light spinner-border-sm'></div>";
+                pass.innerHTML = "<div class='spinner-border text-light spinner-border-sm'></div>";
+                fail.innerHTML = "<div class='spinner-border text-light spinner-border-sm'></div>";
+                na.innerHTML = "<div class='spinner-border text-light spinner-border-sm'></div>";
+            }
+            if (this.readyState == 4 && this.status == 200) {
+                //l.innerHTML = "";
+                pass.innerHTML = "PASS";
+                fail.innerHTML = "FAIL";
+                na.innerHTML = "NOT-ATTENDED";
+                var res = this.responseText;
+                if (status == 'Pass') {
+                    pass.className = "ml-2 btn btn-dark border border-success text-dark bg-success disabled";
+                    fail.className = "ml-2 btn btn-dark border border-danger text-danger";
+                    na.className = "ml-2 btn btn-dark border border-warning text-warning";
+                    
+                }
+                if (status == 'Fail') {
+                    pass.className = "ml-2 btn btn-dark border border-success text-success";
+                    fail.className = "ml-2 btn btn-dark border border-danger text-dark bg-danger disabled";
+                    na.className = "ml-2 btn btn-dark border border-warning text-warning";
+                }
+                if (status == 'Not-Attended') {
+                    pass.className = "ml-2 btn btn-dark border border-success text-success";
+                    fail.className = "ml-2 btn btn-dark border border-danger text-danger";
+                    na.className = "ml-2 btn btn-dark border border-warning text-dark bg-warning disabled";
+                }
+                if(res=='Pass') {
+                    document.getElementById(round_id+"_passed_count").innerHTML = count-1;
+                }
+                if(status=='Pass') {
+                    document.getElementById(round_id+"_passed_count").innerHTML = count+1;
+                }
+            }
+        };
+        xmlhttp.open("GET", "change-student-status/?usn=" + usn + "&round=" + round_id + "&status=" + status, true);
+        xmlhttp.send();
+    }
+{% if user.is_admin %}
+    function title_text_box(element_id, title, round_id, round_date) {
+        title_div = document.getElementById(element_id);
+        text_box = '<div class="form-inline"><div class="input-group"><input type="text" class="form-control" id="title_' + round_id + '" value="' + title + '" >';
+        text_box += '<input type="date" class="form-control" id="date_'+round_id+'" value="'+round_date+'" >';
+        text_box += '<select class="form-control" id="type_'+round_id+'">';
+        text_box += '<option value="Aptitude">Aptitude</option>';
+        text_box += '<option value="Technical">Technical</option>';
+        text_box += '<option value="Discussion">Discussion</option>';
+        text_box += '<option value="Interview">Interview</option>';
+        text_box += '</select>';
+        text_box += '<button class="btn btn-dark border border-secondary" onclick="change_title(\'' + round_id + '\',\''+title+'\',\''+element_id+'\')">Rename</button>';
+        text_box += '<button class="btn btn-dark border border-secondary" onclick="cancel_title(\''+element_id+'\',\''+title+'\')">Cancel</button></div></div>';
+        title_div.innerHTML = text_box;
+    }
+
+    function change_title(round_id, old_title, element_id) {
+        title = document.getElementById('title_'+round_id).value;
+        date = document.getElementById('date_'+round_id).value;
+        type = document.getElementById('type_'+round_id).value;
+        if(title.length == 0) {
+            title = old_title;
+        }
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 1) {
+                document.getElementById(element_id).innerHTML = "<div class='ml-3 spinner-border text-light spinner-border-sm'></div>";
+            }
+            if (this.readyState == 4 && this.status == 200) {
+                var new_title = this.responseText;
+                document.getElementById(element_id).innerHTML = new_title+' | '+type;
+            }
+        };
+        xmlhttp.open("GET", "/company/change-round-title/?round_id="+round_id+"&new_title="+title+"&date="+date+"&type="+type, true);
+        xmlhttp.send();
+    }
+    function cancel_title(element_id, title) {
+        document.getElementById(element_id).innerHTML = title;
+    }
+    function register_all() {
+        res = confirm('Make all the students registered for this company ?');
+        if(!res)
+            event.preventDefault();
+    }
+{% endif %}
+</script>
+<div class="row mt-3 mb-1 text-light">
+    <div class="col">
+        <h2 class="ml-2">{{company.company_name}}</h2>
+    </div>
+    <div class="col-auto ml-auto">
+        <form action="/" method="GET">
+            {% csrf_token %}
+            <div class="input-group mb-3 border border-secondary rounded-lg">
+                <input type="text" name="search_str" class="form-control" id="myInput" placeholder="USN/Name/Branch">
+                <div class="input-group-append">
+                    <input class="btn btn-dark" type="submit" name="search" value="Search" disabled>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div id="cards">
+            <div class="pcard card bg-dark text-white border border-success rounded-lg">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <a class="card-link text-light" data-toggle="collapse" href="#eligible_card_id">
+                                <div class="" style="font-size:1.25rem;">Eligible Students</div>
+                            </a>
+                        </div>
+                        <div class="col-auto ml-auto mt-2">
+                            <div class="dropdown dropleft float-right">
+                                Registered Students : {{registered_count}} / {{elegible_students|length}}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="dropdown dropleft float-right">
+                                <button type="button" class="btn btn-link card-link" style="color:#28a745;"
+                                    data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item"
+                                        href="student-list/?company={{company.id}}&source=registered"><i
+                                            class="fa fa-file-excel" aria-hidden="true"></i>&nbsp Registered Student
+                                        List</a>
+                                    {% if user.is_admin %}
+                                    {% if '0' == company.status %}
+                                    <a class="dropdown-item" onclick="register_all()" href="register-all/?company_id={{company.id}}"><i class="fa fa-check-square-o"></i> Register
+                                        All</a>
+                                    {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="eligible_card_id" class="collapse" data-parent="#cards">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <table class="table table-dark table-hover table-bordered table-striped" id="mytable">
+                                    <thead>
+                                        <tr>
+                                            <th>USN</th>
+                                            <th>NAME</th>
+                                            <th>Branch</th>
+                                            <th>STATUS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for student in elegible_students %}
+                                        <tr>
+                                            <td><a style="color:white;" href="/student/student-summary/?usn={{student.student.USN}}&branch={{student.student.department}}">{{student.student.USN}}</a></td>
+                                            <td>{{student.student.name}}</td>
+                                            <td>{{student.student.department}}</td>
+                                            <td>{{student.status}}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            {% for student_round in students_rounds %}
+            <div
+                class="pcard card bg-dark text-white border border-{% if '1' == student_round.round.status %}warning{% elif '0' == student_round.round.status %}success{% else %}primary{% endif %} rounded-lg">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <a class="card-link text-light" data-toggle="collapse"
+                                href="#round_{{student_round.round.id}}">
+                                <div class="" style="font-size:1.25rem;" id="title_id_{{student_round.round.id}}">
+                                    {{student_round.round.round_title}} | {{student_round.round.round_type}}</div>
+                            </a>
+                        </div>
+                        <div class="col-auto ml-auto mt-2">
+                            <div class="dropdown dropleft float-right">
+                                Passed Students : <span
+                                    id="{{student_round.round.id}}_passed_count">{{student_round.passed_students_count}}</span>
+                                / {{student_round.students|length}}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="dropdown dropleft float-right">
+                                <button type="button" class="btn btn-link card-link"
+                                    style="color:{% if '1' == student_round.round.status %}#ffc107{% elif '0' == student_round.round.status %}#28a745{% else %}#007bff{% endif %};"
+                                    data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+
+                                    {% if '0' == student_round.previous_round_status %}
+                                        {% if '1' != student_round.round.status %}
+                                        <a class="dropdown-item"
+                                            href="student-list/?company={{company.id}}&source={{student_round.round.id}}"><i
+                                                class="fa fa-file-excel" aria-hidden="true"></i>&nbsp Passed Student
+                                            List</a>
+                                        {% endif %}
+
+                                        {% if user.is_admin %}
+                                            {% if '0' != student_round.round.status and '2' == student_round.round.status %}
+                                            <a class="dropdown-item"
+                                                href="change-round-state/?company={{company.id}}&current_round={{student_round.round.id}}&previous_round={{student_round.previous_round_id}}"><i
+                                                    class="fas fa-toggle-on"></i> Finish Round</a>
+                                            {% endif %}
+                                        {% endif %}
+
+                                        {% if user.is_admin %}
+                                            {% if '1' == student_round.round.status and '2' == company.status %}
+                                            <a class="dropdown-item"
+                                                href="change-round-state/?company={{company.id}}&current_round={{student_round.round.id}}&previous_round={{student_round.previous_round_id}}"><i
+                                                    class="fas fa-toggle-on"></i> Activate Round</a>
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% if user.is_admin %}
+                                        {% if student_round.last and 0 == student_round.students|length %}
+                                        <a href="/company/delete-round/?round_id={{student_round.round.id}}&company_id={{company.id}}" class="dropdown-item"><i class="fa fa-trash"></i> Delete round</a>
+                                        {% endif %}
+                                        <a class="dropdown-item"
+                                            onclick="title_text_box('title_id_{{student_round.round.id}}','{{student_round.round.round_title}}','{{student_round.round.id}}','{{student_round.round.round_date|date:'Y-m-d'}}')"><i
+                                                class="fa fa-pencil"></i> Rename</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="round_{{student_round.round.id}}" class="collapse" data-parent="#cards">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                {% if student_round.students|length > 0 %}
+                                <table class="table table-dark table-hover table-bordered table-striped" id="mytable">
+                                    <thead>
+                                        <tr>
+                                            <th>USN</th>
+                                            <th>NAME</th>
+                                            <th>Branch</th>
+                                            <th>STATUS</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for student in student_round.students %}
+                                        <tr>
+                                            <td><a style="color:white;" href="/student/student-summary/?usn={{student.student.USN}}&branch={{student.student.department}}">{{student.student.USN}}</a></td>
+                                            <td>{{student.student.name}}</td>
+                                            <td>{{student.student.department}}</td>
+                                            {% if '2' == student_round.round.status and user.is_admin or user.is_coordinator %}
+                                            <td>
+                                                <a id="pass_{{student.student.USN}}{{student_round.round.id}}"
+                                                    onclick="change_status('{{student.student.USN}}', '{{student_round.round.id}}', 'Pass')"
+                                                    class="ml-2 mt-1 btn btn-dark border border-success {% if 'Pass' == student.status %}text-dark bg-success disabled{% else %}text-success{% endif %}">PASS</a>
+                                                <a id="fail_{{student.student.USN}}{{student_round.round.id}}"
+                                                    onclick="change_status('{{student.student.USN}}', '{{student_round.round.id}}', 'Fail')"
+                                                    class="ml-2 mt-1 btn btn-dark border border-danger {% if 'Fail' == student.status %}text-dark bg-danger disabled{% else %}text-danger{% endif %}">FAIL</a>
+                                                <a id="not_attended_{{student.student.USN}}{{student_round.round.id}}"
+                                                    onclick="change_status('{{student.student.USN}}', '{{student_round.round.id}}', 'Not-Attended')"
+                                                    class="ml-2 mt-1 btn btn-dark border border-warning {% if 'Not-Attended' == student.status %}text-dark bg-warning disabled{% else %}text-warning{% endif %}">NOT-ATTENDED</a>
+                                                <span class="float-right"
+                                                    id="load_{{student.student.USN}}{{student_round.round.id}}"></span>
+                                            </td>
+                                            {% else %}
+                                            <td>{{student.status}}</td>
+                                            {% endif %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#mytable tbody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+{% endblock %}

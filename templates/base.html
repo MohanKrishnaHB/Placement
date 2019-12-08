@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+        integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    {% if messages %}
+    <script>
+            alert('{% for message in messages %}{{ message }}\n{% endfor %}');
+    </script>
+    {% endif %}
+
+    <script>
+        function validate_change_password() {
+            newpass = document.getElementById('n_password').value;
+            confirmpass = document.getElementById('cn_password').value;
+            if(newpass!=confirmpass) {
+                document.getElementById('cn_pass_lable').innerHTML="Confirm New Password : <span class='text-danger'>Does not Match</span>";
+                document.getElementById('submit_change_password').disabled = true;
+            }
+            if(newpass==confirmpass) {
+                document.getElementById('cn_pass_lable').innerHTML="Confirm New Password : <span class='text-success'>Matched</span>";
+                document.getElementById('submit_change_password').disabled = false;
+            }
+            
+        }
+    </script>
+</head>
+
+<body class="bg-dark" onload="first()">
+    <div class="sticky-top">
+        <nav style="background-color: #16161a;"
+            class="navbar navbar-expand-lg navbar-dark sticky-top border border-bottom border-secondary">
+            <a class="navbar-brand" href="/">MITM | Placement {{user.user_type}} </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="collapsibleNavbar">
+                <ul class="navbar-nav">
+                    <li class="nav-item{% if student %} {{'active'}} {% endif %}">
+                        <a class="nav-link" href="/student">Student</a>
+                    </li>
+                    <li class="nav-item{% if company %} {{'active'}} {% endif %}">
+                        <a class="nav-link" href="/company">Company</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ml-auto">
+
+                    {% if user.is_admin %}
+                    <!--<li class="nav-item{% if users %} {{'active'}} {% endif %}">
+                        <a class="nav-link" href="/users">Users</a>
+                    </li>-->
+                    <li class="nav-item{% if more %} {{'active'}} {% endif %}">
+                        <a class="nav-link" href="/users/more">More</a>
+                    </li>
+                    {% endif %}
+                    
+                    <li class="nav-item dropdown dropleft">
+                        <a class="nav-link dropdown-toggle active" data-toggle="dropdown" href="#">{{user.name}} | {{user.department}} </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" data-toggle="modal" data-target="#change_password">Change Password</a>
+                            <a class="dropdown-item" href="/users/log-out">Log-Out</a>
+                        </div>
+                    </li>
+                </ul>
+                <br>
+            </div>
+        </nav>
+    </div>
+    <div class="mx-3 mb-5">
+        {% block content %}
+
+        {% endblock %}
+        <div class="row">
+            <div class="col-auto ml-auto">
+                <button onclick="topFunction()" id="myBtn" title="Go to top"
+                    class="btn btn-primary border border-secondary">
+                    <i class="fa fa-angle-double-up"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+<!-- CHANGE PASSWORD MODAL -->
+<form action="/users/change-password/" method="post">
+    {% csrf_token %}
+    <div class="modal fade" id="change_password" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Change Password | {{user.user_id}}</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="o_password">Current Password:</label>
+                                <input type="password" name="old_password" value="" class="form-control" id="o_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="n_password">New Password:</label>
+                                <input type="password" name="new_password" onkeyup="validate_change_password()" value="" class="form-control" id="n_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="cn_password" id="cn_pass_lable">Confirm New Password:</label>
+                                <input type="password" name="confirm_new_password" onkeyup="validate_change_password()" value="" class="form-control" id="cn_password" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" name="upload" class="btn btn-dark" value="Save" id="submit_change_password">
+                    <button type="button" class="btn" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+</body>
+<script>
+    //Get the button:
+    mybutton = document.getElementById("myBtn");
+
+    // When the user scrolls down 20px from the top of the document, show the button
+    window.onscroll = function () { scrollFunction() };
+
+    function scrollFunction() {
+        if (document.body.scrollTop > 250 || document.documentElement.scrollTop > 250) {
+            mybutton.style.display = "block";
+        } else {
+            mybutton.style.display = "none";
+        }
+    }
+
+    // When the user clicks on the button, scroll to the top of the document
+    function topFunction() {
+        document.body.scrollTop = 0; // For Safari
+        document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+    }
+</script>
+<style>
+    #myBtn {
+        display: none;
+        /* Hidden by default */
+        position: fixed;
+        /* Fixed/sticky position */
+        bottom: 20px;
+        /* Place the button at the bottom of the page */
+        right: 30px;
+        /* Place the button 30px from the right */
+        z-index: 99;
+        /* Make sure it does not overlap */
+        color: white;
+        /* Text color */
+        cursor: pointer;
+        /* Add a mouse pointer on hover */
+        padding: 5px;
+        /* Some padding */
+        font-size: 18px;
+        /* Increase font size */
+        width: 50px;
+    }
+</style>
+
+</html>

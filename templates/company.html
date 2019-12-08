@@ -1,0 +1,479 @@
+{% extends 'base.html' %}
+{% block content %}
+
+{% if user.is_admin %}
+<script>
+    function delete_company(name) {
+        pass = prompt('Enter Password To Delete a company');
+        if(pass!='Delete_') {
+            alert('Incorrect Password');
+            event.preventDefault();
+            return;
+        }
+        res = confirm('Delete '+name+' ?');
+        if(!res)
+            event.preventDefault();
+    }
+    function change_state(msg, company, flag, students_placed) {
+        if(flag=='1') {
+            msg = students_placed+' Students Placed to '+company + '\n' + msg;
+        }
+        if(flag=='0') {
+            msg = students_placed+' Students Registered to '+company + '\n' + msg;
+        }
+        res = confirm(msg);
+        if(!res)
+            event.preventDefault();
+    }
+    function validate() {
+        min = document.getElementById("min_sslc").value;
+        if (isNaN(min) || min == '')
+            document.getElementById("min_sslc").value = '0';
+        min = document.getElementById("min_puc").value;
+        if (isNaN(min) || min == '')
+            document.getElementById("min_puc").value = '0';
+        min = document.getElementById("min_cgpa").value;
+        if (isNaN(min) || min == '')
+            document.getElementById("min_cgpa").value = '0';
+
+        max = document.getElementById("max_sslc").value;
+        if (isNaN(max) || max == '')
+            document.getElementById("max_sslc").value = '100.00';
+        max = document.getElementById("max_puc").value;
+        if (isNaN(max) || max == '')
+            document.getElementById("max_puc").value = '100.00';
+        max = document.getElementById("max_cgpa").value;
+        if (isNaN(max) || max == '')
+            document.getElementById("max_cgpa").value = '10.00';
+
+    }
+    function add_rounds_field() {
+        n = parseInt(document.getElementById("number_of_rounds").value);
+        if (isNaN(n) || n == 0) {
+            set = document.getElementById("rounds");
+            fields = '';
+            set.innerHTML = fields;
+        }
+        else {
+            d = document.getElementById("date_of_visit").value;
+            set = document.getElementById("rounds");
+            fields = '<legend>Rounds:</legend>';
+            for (i = 1; i <= n; i++) {
+                fields += '<div class="row">';
+                fields += '<div class="col">';
+                fields += '<div class="form-group">';
+                fields += '<label for="round' + i + '">Round ' + i + ' Title and conduction date and Type of round:</label>';
+                fields += '<div class="input-group">';
+                fields += '<input type="text" name="round' + i + '" value="" class="form-control" placeholder="Round Title" id="round' + i + '" required>';
+                fields += '<input type="date" name="round' + i + '_date" value="' + d + '" class="form-control" placeholder="Round Conduction date" id="round' + i + '_date" required>';
+                fields += '<select class="form-control" name="round' + i + '_type">';
+                fields += '<option value="Aptitude">Aptitude</option>';
+                fields += '<option value="Technical">Technical</option>';
+                fields += '<option value="Discussion">Discussion</option>';
+                fields += '<option value="Interview">Interview</option>';
+                fields += '</select>';
+                fields += '</div>';
+                fields += '</div>';
+                fields += '</div>';
+                fields += '</div>';
+            }
+            set.innerHTML = fields;
+        }
+    }
+</script>
+{% endif %}
+
+<div class="row mt-4">
+    <div class="col-auto">
+        <form action="/company/" method="POST">
+            {% csrf_token %}
+            <div class="input-group mb-3 border border-secondary rounded-lg">
+                <input type="text" name="company_name" class="form-control" id="myInput" placeholder="Company Name">
+                <div class="input-group-append">
+                    <button class="btn btn-dark" type="submit" disabled>Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {% if user.is_admin %}
+    <div class="col-auto ml-auto">
+        <a href="company" class="btn btn-dark border border-secondary rounded-lg" data-toggle="modal"
+            data-target="#add_company_modal">Add</a>
+    </div>
+    {% endif %}
+
+</div>
+<div class="row mb-3 text-light">
+    <div class="col-auto border border-warning rounded ml-3">
+        Not-Active <b></b>
+    </div>
+    <div class="col-auto border border-primary rounded ml-2">
+        Active <b></b>
+    </div>
+    <div class="col-auto border border-success rounded ml-2">
+        Finished <b></b>
+    </div>
+    <!--<div class="col-auto ml-auto mr-1">
+        Companies : <b>{{companies|length}}</b>
+    </div>-->
+</div>
+<div class="row">
+    <div class="col">
+        <div id="cards">
+            {% for company in companies %}
+            {% if user.department in company.branches or 'Placement' == user.department%}
+            <div class="pcard card bg-dark text-white border border-{% if '0' == company.status %}warning{% elif '1' == company.status %}success{% else %}primary{% endif %} rounded-lg">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <a class="card-link text-light" data-toggle="collapse" href="#company_{{company.id}}">
+                                <div class="" style="font-size:1.25rem;">{{company.company_name}}</div>
+                            </a>
+                        </div>
+                        <div class="col-auto ml-auto">
+                            <div class="dropdown dropleft float-right">
+                                <button type="button" class="btn btn-link card-link"
+                                    style="color:{% if '0' == company.status %} #ffc107 {% elif '1' == company.status %}#28a745{% else %}#007bff{% endif %};"
+                                    data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="/activity/student-list/?company={{company.id}}&source=eligible"><i
+                                            class="fa fa-file-excel" aria-hidden="true"></i>&nbsp Eligible Student List</a>
+                                    <a class="dropdown-item" href="/activity/?company={{company.id}}"><i
+                                            class="fa fa-table"></i> {% if '2' == company.status %}Placement Activity{%else%}View Round details {% endif %}</a>
+
+                                    {% if user.is_admin or user.is_coordinator and permission.add_students_to_company %}
+                                        {% if '0' == company.status %}
+                                        <a class="dropdown-item" href="add-students-to-company/?company={{company.id}}"><i
+                                                class="fas fa-user-plus"></i> Add Students</a>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {% if user.is_admin %}
+                                        <a class="dropdown-item disabled" href=""><i
+                                                class="far fa-edit"></i> edit</a>
+                                        <a class="dropdown-item" onclick="delete_company('{{company.company_name}}')" href="delete-company/?company_id={{company.id}}"><i class="fa fa-trash"></i> Delete</a>
+                                        {% if '0' == company.status %}
+                                        <a class="dropdown-item" href="change-company-state/?company={{company.id}}" title="Change State"
+                                            onclick="change_state('Activate {{company.company_name}} activity ?', '{{company.company_name}}', '0', '{{company.students_registered}}')"><i
+                                                class="fas fa-toggle-on"></i>
+                                                Make Company active
+                                        </a>
+                                        {% endif %}
+                                        {% if '2' == company.status and '0' == company.finished %}
+                                        <a class="dropdown-item" href="change-company-state/?company={{company.id}}" title="Change State"
+                                            onclick="change_state('Finish {{company.company_name}} Activity ?', '{{company.company_name}}', '1', '{{company.students_placed}}')"><i
+                                                class="fas fa-toggle-on"></i>
+                                                Finish Company Activity
+                                        </a>
+                                        {% endif %}
+                                    {% endif %}
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="company_{{company.id}}" class="collapse" data-parent="#cards">
+                    <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-auto">
+                                <div>Venue : <ul><b>{{company.venue}}</b></ul>
+                                </div>
+                                <div>Date of Visit : <ul><b>{{company.date_of_visit}}</b></ul>
+                                </div>
+                                <div>Branches : <ul><b>
+                                            {% for branch in company.branches %}
+                                            {{branch}},
+                                            {% endfor %}
+                                        </b></ul>
+                                </div>
+                            </div>
+                            <div class="col-auto border border-right-0 border-top-0 border-bottom-0 border-secondary">
+                                Package : <ul><b>{{company.package}}</b></ul>
+                                Aggregate : <ul><b>({{company.min_SSLC_percentage}}%, {{company.min_PUC_percentage}}%,
+                                        {{company.min_CGPA}})
+                                        <br />To<br />
+                                        ({{company.max_SSLC_percentage}}%, {{company.max_PUC_percentage}}%,
+                                        {{company.max_CGPA}})</b></ul>
+                            </div>
+                            <div class="col-auto border border-right-0 border-top-0 border-bottom-0 border-secondary">
+                                <div class="row">
+                                    <div class="col"> Rounds : 
+                                        <span class="float-right"><a href="/activity/?company={{company.id}}" title="View Rounds Details"><i class="fa fa-angle-double-right"></i></a></span>
+                                        <b>
+                                            <ul>
+                                                {% for round in company.rounds %}
+                                                <li>{{round.title}} - {{round.date}}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </b>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col"> Registration Timings : 
+                                        <b>
+                                            <ul>
+                                                {{company.registration.start_time}} - {{company.registration.end_time}}
+                                            </ul>
+                                        </b>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col border border-right-0 border-top-0 border-bottom-0 border-light">
+                                <table class="table table-dark">
+                                    <thead>
+                                        <tr>
+                                            <th>Branch</th>
+                                            {% for branch in company.branches %}
+                                            <th>{{branch}}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <th>Eligible</th>
+                                            {% for count in company.eligible %}
+                                            <th>{{count}}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="w-100 mt-1"></div>
+                            <div class="col mt-1">
+                                <div id="accordion">
+                                    <div class="card bg-dark border">
+                                        <div class="card-header">
+                                            <a class="card-link text-light" data-toggle="collapse"
+                                                href="#description_{{company.id}}">
+                                                Job Description
+                                            </a>
+                                        </div>
+                                        <div id="description_{{company.id}}" class="collapse"
+                                            data-parent="#accordion">
+                                            <div class="card-body">
+                                                <pre class="text-white">{{company.description}}</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% if user.is_admin %}
+<!-- COMPANY ADDING MODAL -->
+<form action="add-company/" method="POST" onsubmit="validate()">
+    {% csrf_token %}
+    <div class="modal fade" id="add_company_modal" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add Company</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="c_name">Company Name:</label>
+                                <input type="text" name="company_name" value="" class="form-control" id="c_name"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="description">Description:</label>
+                                <textarea class="form-control" name="description" rows="5" id="description"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="venue">Venue:</label>
+                                <input type="text" name="venue" value="" class="form-control" id="venue" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="date_of_visit">Date of visit:</label>
+                                <input type="date" name="date_of_visit" value="" class="form-control" id="date_of_visit"
+                                    required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mx-5 my-3">
+                        <div class="col-auto">
+                            Departments:
+                        </div>
+                    </div>
+                    <div class="row mx-5 my-3">
+                        <div class="col-auto text-light">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" name="ISE" value="True">
+                                    </div>
+                                </div>
+                                <input type="text" value="ISE" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="col-auto text-light">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" name="CSE" value="True">
+                                    </div>
+                                </div>
+                                <input type="text" value="CSE" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="col-auto text-light">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" name="ECE" value="True">
+                                    </div>
+                                </div>
+                                <input type="text" value="ECE" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="col-auto text-light">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" name="MEC" value="True">
+                                    </div>
+                                </div>
+                                <input type="text" value="MEC" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="col-auto text-light">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" name="CIV" value="True">
+                                    </div>
+                                </div>
+                                <input type="text" value="CIV" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="col-auto text-light">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" name="MCA" value="True">
+                                    </div>
+                                </div>
+                                <input type="text" value="MCA" class="form-control" readonly>
+                            </div>
+                        </div>
+                        <div class="col-auto text-light">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <div class="input-group-text">
+                                        <input type="checkbox" name="MBA" value="True">
+                                    </div>
+                                </div>
+                                <input type="text" value="MBA" class="form-control" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="package">Package:</label>
+                                <input type="text" name="package" value="" class="form-control" id="package" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="number_of_rounds">Number of rounds:</label>
+                                <input type="number" name="number_of_rounds" onkeyup="add_rounds_field()" value=""
+                                    class="form-control" id="number_of_rounds" step="1" min="1" max="5" required>
+                            </div>
+                        </div>
+                    </div>
+                    <fieldset id="rounds">
+
+                    </fieldset>
+                    <div class="row">
+                        <div class="col">
+                            <label for="min_marks">Min Marks:</label>
+                            <div class="input-group" id="min_marks">
+                                <input type="number" name="min_sslc" class="form-control" placeholder="SSLC %"
+                                    step="any" id="min_sslc" min=0 max=100>
+                                <input type="number" name="min_puc" class="form-control" placeholder="PUC %" step="any"
+                                    id="min_puc" min=0 max=100>
+                                <input type="number" name="min_cgpa" class="form-control" placeholder="CGPA" step="any"
+                                    id="min_cgpa" min=0 max=10>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="max_marks">Max Marks:</label>
+                            <div class="input-group" id="max_marks">
+                                <input type="number" name="max_sslc" class="form-control" placeholder="SSLC %"
+                                    step="any" id="max_sslc" min=0 max=100>
+                                <input type="number" name="max_puc" class="form-control" placeholder="PUC %" step="any"
+                                    id="max_puc" min=0 max=100>
+                                <input type="number" name="max_cgpa" class="form-control" placeholder="CGPA" step="any"
+                                    id="max_cgpa" min=0 max=10>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="registration_start_time">Registration Start time</label>
+                                <input type="datetime-local" name="registration_start_time" value="" class="form-control" id="registration_start_time" step="1" min="1" max="5" required>
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="registration_end_time">Registration End time</label>
+                                <input type="datetime-local" name="registration_end_time" value="" class="form-control" id="registration_end_time" step="1" min="1" max="5" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" name="upload" class="btn btn-dark" value="ADD">
+                    <button type="button" class="btn" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endif %}
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#cards .pcard").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+{% endblock %}

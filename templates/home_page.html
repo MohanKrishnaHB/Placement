@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .chart1 {
+        width: 100%;
+        min-height: 300px;
+    }
+</style>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', { 'packages': ['bar'] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Round', 'Pass percentage'],
+            ['Aptitude', {{stats.aptitude_pass_percentage}}],
+            ['Discussion', {{stats.discussion_pass_percentage}}],
+            ['Technical', {{stats.technical_pass_percentage}}],
+            ['Interview', {{stats.interview_pass_percentage}}],
+        ]);
+
+        var options = {
+            chart: {
+                title: 'Students\' Performance',
+                subtitle: 'Each Round Pass Percentage',
+            },
+            hAxis: {
+                textStyle: {
+                    color: 'white'
+                },
+                titleTextStyle: {
+                    color: 'white'
+                }
+            },
+            vAxis: {
+                textStyle: {
+                    color: 'white'
+                },
+                titleTextStyle: {
+                    color: 'white'
+                },
+                format: 'percent',
+                viewWindowMode:'explicit',
+                viewWindow: {
+                    max:1,
+                    min:0
+                }
+            },
+            titleTextStyle: {
+                color: "#FFFFFF",    // any HTML string color ('red', '#cc00cc')
+                //fontName: <string>, // i.e. 'Times New Roman'
+                //fontSize: <number>, // 12, 18 whatever you want (don't specify px)
+                //bold: <boolean>,    // true or false
+                //italic: <boolean>   // true of false
+            },
+            backgroundColor: '#343a40',
+            'legend': { 'position': 'none', textStyle: { color: 'white' } },
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+
+    }
+
+    $(window).resize(function(){
+        drawChart();
+      });
+</script>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col">
+            <div class="border p-3 chart1" id="columnchart_material"></div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col">
+            <table class="table table-dark table-hover table-bordered shadow">
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Attended</th>
+                        <th>Placed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for company in companies %}
+                    <tr>
+                        <td>{{company.company_name}}</td>
+                        <td>{{company.registered}}</td>
+                        <td>{{company.placed}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row m-5 justify-content-center">
+    <div class="col p-3 border border-secondary rounded text-light">
+        <h3
+            class="text-light text-center pb-3 border border-secondary border-top-0 border-left-0 border-right-0 rounded">
+            Company Name</h3>
+        <form action="" method="POST">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="c_name">Company Name:</label>
+                        <input type="text" name="company_name" value="" class="form-control" id="c_name" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea class="form-control" name="description" rows="5" id="description"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="venue">Venue:</label>
+                        <input type="text" name="venue" value="" class="form-control" id="venue" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="date_of_visit">Date of visit:</label>
+                        <input type="date" name="date_of_visit" value="" class="form-control" id="date_of_visit"
+                            required>
+                    </div>
+                </div>
+            </div>
+            <div class="row mx-5 my-3">
+                <div class="col-auto">
+                    Departments:
+                </div>
+            </div>
+            <div class="row mx-5 my-3">
+                <div class="col-auto text-light">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox" name="ISE" value="True">
+                            </div>
+                        </div>
+                        <input type="text" value="ISE" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col-auto text-light">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox" name="CSE" value="True">
+                            </div>
+                        </div>
+                        <input type="text" value="CSE" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col-auto text-light">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox" name="ECE" value="True">
+                            </div>
+                        </div>
+                        <input type="text" value="ECE" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col-auto text-light">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox" name="MEC" value="True">
+                            </div>
+                        </div>
+                        <input type="text" value="MEC" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col-auto text-light">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox" name="CIV" value="True">
+                            </div>
+                        </div>
+                        <input type="text" value="CIV" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col-auto text-light">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox" name="MCA" value="True">
+                            </div>
+                        </div>
+                        <input type="text" value="MCA" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="col-auto text-light">
+                    <div class="input-group mb-2">
+                        <div class="input-group-prepend">
+                            <div class="input-group-text">
+                                <input type="checkbox" name="MBA" value="True">
+                            </div>
+                        </div>
+                        <input type="text" value="MBA" class="form-control" readonly>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="form-group">
+                        <label for="package">Package:</label>
+                        <input type="text" name="package" value="" class="form-control" id="package" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label for="min_marks">Min Marks:</label>
+                    <div class="input-group" id="min_marks">
+                        <input type="number" name="min_sslc" class="form-control" placeholder="SSLC %" step="any"
+                            id="min_sslc" min=0 max=100>
+                        <input type="number" name="min_puc" class="form-control" placeholder="PUC %" step="any"
+                            id="min_puc" min=0 max=100>
+                        <input type="number" name="min_cgpa" class="form-control" placeholder="CGPA" step="any"
+                            id="min_cgpa" min=0 max=10>
+                    </div>
+                </div>
+                <div class="col">
+                    <label for="max_marks">Max Marks:</label>
+                    <div class="input-group" id="max_marks">
+                        <input type="number" name="max_sslc" class="form-control" placeholder="SSLC %" step="any"
+                            id="max_sslc" min=0 max=100>
+                        <input type="number" name="max_puc" class="form-control" placeholder="PUC %" step="any"
+                            id="max_puc" min=0 max=100>
+                        <input type="number" name="max_cgpa" class="form-control" placeholder="CGPA" step="any"
+                            id="max_cgpa" min=0 max=10>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-auto ml-auto mt-2">
+                    <input type="submit" class="btn btn-dark border border-secondary" name="submit">
+                    <input type="reset" class="btn btn-light" value="Clear" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

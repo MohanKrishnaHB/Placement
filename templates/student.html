@@ -1,0 +1,542 @@
+{% extends 'base.html' %}
+{% block content %}
+<script>
+    function first() {
+        get_student_details(0);
+    }
+    function get_student_details(choice) {
+        var branches = [{% for branch in branches %} '{{branch}}', {% endfor %}];
+    branches_checked = '';
+    n = branches.length;
+    for (i = 0; i < n; i++) {
+        if (document.getElementById(branches[i]).checked)
+            branches_checked = branches_checked + branches[i] + '|';
+    }
+    var student_status = 'False';
+    if(document.getElementById('inactive').checked) {
+        student_status = 'True';
+    }
+    n = 7;
+    marks = '';
+    if (choice == 0) {
+        for (i = 0; i <= n; i++) {
+            if (document.getElementById(String(i)).checked)
+                marks = document.getElementById(String(i)).value;
+        }
+    }
+    if (choice == 1) {
+        if (document.getElementById("sslc_min").value.length != 0)
+            sslc_min = document.getElementById("sslc_min").value;
+        else
+            sslc_min = 0;
+        if (document.getElementById("puc_min").value.length != 0)
+            puc_min = document.getElementById("puc_min").value;
+        else
+            puc_min = 0;
+        if (document.getElementById("cgpa_min").value.length != 0)
+            cgpa_min = document.getElementById("cgpa_min").value;
+        else
+            cgpa_min = 0;
+        if (document.getElementById("sslc_max").value.length != 0)
+            sslc_max = document.getElementById("sslc_max").value;
+        else
+            sslc_max = 100;
+        if (document.getElementById("puc_max").value.length != 0)
+            puc_max = document.getElementById("puc_max").value;
+        else
+            puc_max = 100;
+        if (document.getElementById("cgpa_max").value.length != 0)
+            cgpa_max = document.getElementById("cgpa_max").value;
+        else
+            cgpa_max = 10;
+        
+        marks = sslc_min+','+puc_min+','+cgpa_min+'|'+sslc_max+','+puc_max+','+cgpa_max;
+    }
+    var myObj = {};
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function () {
+        if (this.readyState == 1) {
+            document.getElementById("total_students_count").innerHTML = "<div class='ml-3 spinner-border text-light spinner-border-sm'></div>";
+            document.getElementById('be_students_count').innerHTML = "<div class='ml-3 spinner-border text-light spinner-border-sm'></div>";
+            {% if 'MCA' in branches %}document.getElementById('mca_students_count').innerHTML = "<div class='ml-3 spinner-border text-light spinner-border-sm'></div>";{% endif %}
+            {% if 'MBA' in branches %}document.getElementById('mba_students_count').innerHTML = "<div class='ml-3 spinner-border text-light spinner-border-sm'></div>";{% endif %}
+            document.getElementById('advanced_loading').innerHTML = "<div class='spinner-border text-light'></div>";
+        }
+        if (this.readyState == 4 && this.status == 200) {
+            document.getElementById('advanced_loading').innerHTML = '';
+            myObj = JSON.parse(this.responseText);
+            be_student_count = myObj.be_students.length;
+            if (be_student_count == 0) {
+                document.getElementById("be_students_card").style.display = "none";
+            }
+            else {
+                document.getElementById("be_students_card").style.display = "block";
+                document.getElementById('be_students_count').innerHTML = be_student_count;
+                be_students_table = '';
+                for (i = 0; i < be_student_count; i++) {
+                    usn = '<td><a style="color:white;" href="student-summary/?usn=' + myObj.be_students[i].USN + '&branch=' + myObj.be_students[i].branch + '">' + myObj.be_students[i].USN + '</a></td>';
+                    name = '<td>' + myObj.be_students[i].name + '</td>';
+                    branch = '<td>' + myObj.be_students[i].branch + '</td>';
+                    email = '<td>' + myObj.be_students[i].email + '</td>';
+                    phone = '<td>' + myObj.be_students[i].phone + '</td>';
+                    sslc_percentage = '<td>' + myObj.be_students[i].sslc_percentage + '</td>';
+                    puc_or_diploma = myObj.be_students[i].puc_or_diploma;
+                    puc_or_diploma_percentage = '<td>' + myObj.be_students[i].puc_or_diploma_percentage + '</td>';
+                    cgpa = '<td>' + myObj.be_students[i].cgpa + '</td>';
+                    edit = '';
+                    {% if user.is_admin or user.is_coordinator and permission.coordinator_edit_student_details %}
+                        edit = '<td><a href="edit-student/?usn=' + myObj.be_students[i].USN + '" title="Edit"><i class="far fa-edit" style="color:#FFFFFF;"></i></a></td>';
+                    {% endif %}
+                    be_students_table = be_students_table + '<tr>' + usn + name + branch + email + phone + sslc_percentage + puc_or_diploma_percentage + cgpa + edit + '</tr>';
+                }
+                document.getElementById('be_students_table_body').innerHTML = be_students_table;
+            }
+            mca_student_count = myObj.mca_students.length;
+            if (mca_student_count == 0) {
+                {% if 'MBA' in branches %}document.getElementById("mca_students_card").style.display = "none";{% endif %}
+            }
+            else {
+                document.getElementById("mca_students_card").style.display = "block";
+                document.getElementById('mca_students_count').innerHTML = mca_student_count;
+                mca_students_table = '';
+                for (i = 0; i < mca_student_count; i++) {
+                    usn = '<td><a style="color:white;" href="student-summary/?usn=' + myObj.mca_students[i].USN + '&branch=' + myObj.mca_students[i].branch + '">' + myObj.mca_students[i].USN + '</td>';
+                    name = '<td>' + myObj.mca_students[i].name + '</td>';
+                    branch = '<td>' + myObj.mca_students[i].branch + '</td>';
+                    email = '<td>' + myObj.mca_students[i].email + '</td>';
+                    phone = '<td>' + myObj.mca_students[i].phone + '</td>';
+                    sslc_percentage = '<td>' + myObj.mca_students[i].sslc_percentage + '</td>';
+                    puc_or_diploma = myObj.mca_students[i].puc_or_diploma;
+                    puc_or_diploma_percentage = '<td>' + myObj.mca_students[i].puc_or_diploma_percentage + '</td>';
+                    bca_percentage = '<td>' + myObj.mca_students[i].bca_percentage + '</td>';
+                    cgpa = '<td>' + myObj.mca_students[i].cgpa + '</td>';
+                    edit = '';
+                    {% if user.is_admin or user.is_coordinator and permission.coordinator_edit_student_details %}
+                        edit = '<td><a href="edit-student/?usn=' + myObj.mca_students[i].USN + '" title="Edit"><i class="far fa-edit" style="color:#FFFFFF;"></i></a></td>';
+                    {% endif %}
+                    mca_students_table = mca_students_table + '<tr>' + usn + name + branch + email + phone + sslc_percentage + puc_or_diploma_percentage + bca_percentage + cgpa + edit + '</tr>';
+                }
+                document.getElementById('mca_students_table_body').innerHTML = mca_students_table;
+            }
+            mba_student_count = myObj.mba_students.length;
+            if (mba_student_count == 0) {
+                {% if 'MBA' in branches %}document.getElementById("mba_students_card").style.display = "none";{% endif %}
+            }
+            else {
+                document.getElementById("mba_students_card").style.display = "block";
+                document.getElementById('mba_students_count').innerHTML = mba_student_count;
+                mba_students_table = '';
+                for (i = 0; i < mba_student_count; i++) {
+                    usn = '<td><a style="color:white;" href="student-summary/?usn=' + myObj.mba_students[i].USN + '&branch=' + myObj.mba_students[i].branch + '">' + myObj.mba_students[i].USN + '</td>';
+                    name = '<td>' + myObj.mba_students[i].name + '</td>';
+                    branch = '<td>' + myObj.mba_students[i].branch + '</td>';
+                    email = '<td>' + myObj.mba_students[i].email + '</td>';
+                    phone = '<td>' + myObj.mba_students[i].phone + '</td>';
+                    sslc_percentage = '<td>' + myObj.mba_students[i].sslc_percentage + '</td>';
+                    puc_or_diploma = myObj.mba_students[i].puc_or_diploma;
+                    puc_or_diploma_percentage = '<td>' + myObj.mba_students[i].puc_or_diploma_percentage + '</td>';
+                    bba_or_bcom_percentage = '<td>' + myObj.mba_students[i].bba_or_bcom_percentage + '</td>';
+                    cgpa = '<td>' + myObj.mba_students[i].cgpa + '</td>';
+                    edit = '';
+                    {% if user.is_admin or user.is_coordinator and permission.coordinator_edit_student_details %}
+                        edit = '<td><a href="edit-student/?usn=' + myObj.mba_students[i].USN + '" title="Edit"><i class="far fa-edit" style="color:#FFFFFF;"></i></a></td>';
+                    {% endif %}
+                    mba_students_table = mba_students_table + '<tr>' + usn + name + branch + email + phone + sslc_percentage + puc_or_diploma_percentage + bba_or_bcom_percentage + cgpa + edit + '</tr>';
+                }
+                document.getElementById('mba_students_table_body').innerHTML = mba_students_table;
+            }
+            document.getElementById("total_students_count").innerHTML = be_student_count + mca_student_count + mba_student_count;
+            document.getElementById("download_detailed_list").href = "/student/get_student_details/?branches=" + branches_checked + "&marks=" + marks + "&get_inactive=" + student_status + "&download_detailed_list=True";
+            document.getElementById("download_attendance_list").href = "/student/get_student_details/?branches=" + branches_checked + "&marks=" + marks + "&get_inactive=" + student_status + "&download_attendance_list=True";
+        }
+    };
+    xmlhttp.open("GET", "/student/get_student_details/?branches=" + branches_checked + "&marks=" + marks + "&get_inactive=" + student_status, true);
+    xmlhttp.send();
+            //alert(branches_checked);
+            //alert(marks);
+    }
+</script>
+<div class="row mt-4">
+    <div class="col-auto">
+        <form action="/" method="GET">
+            {% csrf_token %}
+            <div class="input-group mb-3 border border-secondary rounded-lg">
+                <input type="text" name="search_str" class="form-control" id="myInput"
+                    placeholder="USN/Name/Branch">
+                <div class="input-group-append">
+                    <input class="btn btn-dark" type="submit" name="search" value="Search" disabled>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if user.is_admin %}
+    <div class="col-auto ml-auto">
+        <a href="#" class="btn btn-dark border border-secondary rounded-lg" data-toggle="modal"
+            data-target="#student_file_modal">Add</a>
+    </div>
+    {% endif %}
+</div>
+<div class="row mt-2">
+    <div class="col">
+        <div id="cards">
+            <div class="card bg-dark text-white border border-secondary">
+                <div class="card-header">
+                    <a class="card-link text-light" data-toggle="collapse" href="#advanced">
+                        <div class="row">
+                            <div class="col">
+                                <h5 class="card-title">Advanced</h5>
+                            </div>
+                            <div class="col-auto ml-auto">
+                                <div id="advanced_loading"></div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div id="advanced" class="collapse" data-parent="#cards">
+                    <div class="card-body">
+                        <div class="row mt-1">
+                            <div class="col-auto">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="checkbox" onclick="get_student_details(0)" id="inactive" checked>
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="Placed Students" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <h6>Departments</h6>
+                            </div>
+                            <div class="w-100"></div>
+                            {% for branch in branches %}
+                            <div class="col-auto">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="checkbox" onclick="get_student_details(0)" id="{{branch}}"
+                                                checked>
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="{{branch}}" readonly>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="row mt-1">
+                            <div class="col-auto">
+                                <h6>Marks Throughout</h6>
+                            </div>
+                            <div class="w-100"></div>
+                            <div class="col-auto">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" onclick="get_student_details(0)"
+                                                value="0,0,0|100,100,10" id="0" name="marks" checked>
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="All" readonly>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" onclick="get_student_details(0)"
+                                                value="60,60,6|100,100,10" id="1" name="marks">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder=">60" readonly>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" onclick="get_student_details(0)"
+                                                value="65,65,6.5|100,100,10" id="2" name="marks">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder=">65" readonly>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" onclick="get_student_details(0)"
+                                                value="70,70,7|100,100,10" id="3" name="marks">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder=">70" readonly>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" onclick="get_student_details(0)" value="50,50,5|60,60,6"
+                                                id="4" name="marks">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="50-60" readonly>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" onclick="get_student_details(0)" value="40,40,4|60,60,6"
+                                                id="5" name="marks">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder="40-60" readonly>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" onclick="get_student_details(0)"
+                                                value="75,75,7.5|100,100,10" id="6" name="marks">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder=">75" readonly>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-prepend">
+                                        <div class="input-group-text">
+                                            <input type="radio" onclick="get_student_details(0)"
+                                                value="80,80,8|100,100,10" id="7" name="marks">
+                                        </div>
+                                    </div>
+                                    <input type="text" class="form-control" placeholder=">80" readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-auto mb-2">
+                                <label>Min Marks</label>
+                                <div class="input-group" id="base_marks">
+                                    <input type="number" name="sslc" class="form-control" placeholder="SSLC %"
+                                        id="sslc_min" step="any" min=0 max=100>
+                                    <input type="number" name="puc" class="form-control" placeholder="PUC %"
+                                        id="puc_min" step="any" min=0 max=100>
+                                    <input type="number" name="cgpa" class="form-control" placeholder="CGPA"
+                                        id="cgpa_min" step="any" min=0 max=10>
+                                </div>
+                            </div>
+                            <div class="col-auto mb-2">
+                                    <label>Max Marks</label>
+                                <div class="input-group" id="base_marks">
+                                    <input type="number" name="sslc" class="form-control" placeholder="SSLC %"
+                                        id="sslc_max" step="any" min=0 max=100>
+                                    <input type="number" name="puc" class="form-control" placeholder="PUC %"
+                                        id="puc_max" step="any" min=0 max=100>
+                                    <input type="number" name="cgpa" class="form-control" placeholder="CGPA"
+                                        id="cgpa_max" step="any" min=0 max=10>
+                                </div>
+                            </div>
+                            <div class="col-auto">
+                                <button onclick="get_student_details(1)"
+                                    class="btn btn-dark border border-secondary">Go</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mt-2 text-light">
+    <div class="col-auto ml-auto mr-1">
+        <a href="#" id="download_attendance_list">Download Addendance list</a> | <a href="#"
+            id="download_detailed_list">Download Detailed list</a> | Students : <b id="total_students_count"></b>
+    </div>
+</div>
+<div class="row my-2">
+    <div class="col">
+        <div id="cards1">
+            <div class="card bg-dark text-white border border-secondary" style="display:none;" id="be_students_card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <a class="card-link text-light" data-toggle="collapse" href="#be_stdents">
+                                <h5 class="card-title">BE Students</h5>
+                            </a>
+                        </div>
+                        <div class="col-auto mr-auto">Students : <span id="be_students_count"></span></div>
+                    </div>
+                </div>
+                <div id="be_stdents" class="collapse" data-parent="#cards1">
+                    <div class="card-body">
+                        <table class="table table-dark table-hover table-bordered table-striped" id="mytable">
+                            <thead>
+                                <tr>
+                                    <th>USN</th>
+                                    <th>NAME</th>
+                                    <th>Branch</th>
+                                    <th>Email</th>
+                                    <th>Mobile no.</th>
+                                    <th>10th Marks</th>
+                                    <th>12th Marks</th>
+                                    <th>CGPA</th>
+                                    {% if user.is_admin or user.is_coordinator and permission.coordinator_edit_student_details %}
+                                    <th>Edit</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody id="be_students_table_body">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-dark text-white border border-secondary mt-2" style="display:none;"
+                id="mba_students_card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <a class="card-link text-light" data-toggle="collapse" href="#mba_stdents">
+                                <h5 class="card-title">MBA Students</h5>
+                            </a>
+                        </div>
+                        <div class="col-auto mr-auto">Students : <span id="mba_students_count"></span></div>
+                    </div>
+                </div>
+                <div id="mba_stdents" class="collapse" data-parent="#cards1">
+                    <div class="card-body">
+                        <table class="table table-dark table-hover table-bordered table-striped" id="mytable">
+                            <thead>
+                                <tr>
+                                    <th>USN</th>
+                                    <th>NAME</th>
+                                    <th>Branch</th>
+                                    <th>Email</th>
+                                    <th>Mobile no.</th>
+                                    <th>10th Marks</th>
+                                    <th>12th Marks</th>
+                                    <th>BBA or BCOM Marks</th>
+                                    <th>CGPA</th>
+                                    {% if user.is_admin or user.is_coordinator and permission.coordinator_edit_student_details %}
+                                        <th>Edit</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody id="mba_students_table_body">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-dark text-white border border-secondary mt-2" style="display:none;"
+                id="mca_students_card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <a class="card-link text-light" data-toggle="collapse" href="#mca_stdents">
+                                <h5 class="card-title">MCA Students</h5>
+                            </a>
+                        </div>
+                        <div class="col-auto mr-auto">Students : <span id="mca_students_count"></span></div>
+                    </div>
+                </div>
+                <div id="mca_stdents" class="collapse" data-parent="#cards1">
+                    <div class="card-body">
+                        <table class="table table-dark table-hover table-bordered table-striped" id="mytable">
+                            <thead>
+                                <tr>
+                                    <th>USN</th>
+                                    <th>NAME</th>
+                                    <th>Branch</th>
+                                    <th>Email</th>
+                                    <th>Mobile no.</th>
+                                    <th>10th Marks</th>
+                                    <th>12th Marks</th>
+                                    <th>BCA Marks</th>
+                                    <th>CGPA</th>
+                                    {% if user.is_admin or user.is_coordinator and permission.coordinator_edit_student_details %}
+                                        <th>Edit</th>
+                                    {% endif %}
+                                </tr>
+                            </thead>
+                            <tbody id="mca_students_table_body">
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if user.is_admin %}
+<!-- STUDENT FILE ADDING MODAL -->
+<form action="/student/add-students-file/" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="modal fade" id="student_file_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Select Excel File</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col">
+                            <!--<div class="form-group mb-3">
+                                <label class="control-label col" for="pwd">Select Branch:</label>
+                                <select name="branch" class="form-control">
+                                    <option value="ISE">ISE</option>
+                                    <option value="CSE">CSE</option>
+                                    <option value="MEC">MEC</option>
+                                    <option value="ECE">ECE</option>
+                                    <option value="CIV">CIV</option>
+                                </select>
+                            </div>-->
+                            <div class="form-group mb-3">
+                                <div class="custom-file">
+                                    <input type="file" name="student_file" class="custom-file-input" id="customFile">
+                                    <label class="custom-file-label" for="customFile">Choose file</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" name="upload" class="btn btn-dark" value="Upload">
+                    <button type="button" class="btn" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</form>
+<script>
+    // Add the following code if you want the name of the file appear on select
+    $(".custom-file-input").on("change", function () {
+        var fileName = $(this).val().split("\\").pop();
+        $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+    });
+</script>
+{% endif %}
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#mytable tbody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+{% endblock %}

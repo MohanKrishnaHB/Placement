@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block content %}
+<script>
+    function add_student(usn) {
+        add = document.getElementById(usn).checked;
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var myObj = JSON.parse(this.responseText);
+            }
+        };
+        xmlhttp.open("GET", "/company/add-student-to-company/?usn="+usn+"&company={{company}}&add="+add, true);
+        xmlhttp.send();
+    }
+</script>
+<div class="row mt-4">
+    <div class="col-auto text-white"><h1>{{company}}</h1></div>
+    <div class="col-auto ml-auto">
+        <form action="/" method="GET">
+            {% csrf_token %}
+            <div class="input-group mb-3 border border-secondary rounded-lg">
+                <input type="text" name="search_str" class="form-control" id="myInput" placeholder="USN/Name/Branch">
+                <div class="input-group-append">
+                    <input class="btn btn-dark" type="submit" name="search" value="Search" disabled>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col">
+        <form>
+        <table class="table table-dark table-hover table-bordered table-striped" id="mytable">
+            <thead>
+                <tr>
+                    <th>ADD</th>
+                    <th>USN</th>
+                    <th>NAME</th>
+                    <th>Branch</th>
+                    <th>10th Marks</th>
+                    <th>12th Marks</th>
+                    <th>CGPA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students_list %}
+                <tr>
+                    <td>
+                        <input type="checkbox" id="{{student.student.USN.USN}}" onclick="add_student('{{student.student.USN.USN}}')" {% if student.selected %}checked{% endif %}>
+                    </td>
+                    <td>{{student.student.USN.USN}}</td>
+                    <td>{{student.student.USN.name}}</td>
+                    <td>{{student.student.USN.department}}</td>
+                    <td>{{student.student.SSLC_percentage}}</td>
+                    <td>{{student.student.PUC_or_diploma_percentage}}</td>
+                    <td>{{student.student.CGPA}}</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+    </form>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#mytable tbody tr").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+{% endblock %}

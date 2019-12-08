@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block content %}
+<script>
+        function delete_user(user) {
+            choice = confirm('Want to delete ' + user + ' ?')
+            if (choice == false) {
+                event.preventDefault()
+            }
+        }
+    </script>
+<div class="row mt-4 mx-5">
+    <!--<div class="col-auto">
+        <form action="student" method="POST">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="USN/Name/Branch/Active">
+                <div class="input-group-append">
+                    <button class="btn btn-dark" type="submit">Search</button>
+                </div>
+            </div>
+        </form>
+    </div>-->
+    <div class="col-auto ml-auto">
+        <a href="#" class="btn btn-dark border border-secondary" data-toggle="modal"
+            data-target="#add_coordinator_modal">Add</a>
+    </div>
+</div>
+{% if users %}
+<div class="row mt-4 mx-5">
+    <div class="col">
+        <table class="table table-dark table-hover table-bordered">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>NAME</th>
+                    <th>Branch</th>
+                    <th>User Type</th>
+                    <th>Delete</th>
+                </tr>
+                {% for user in users %}
+                <tr>
+                    <td>{{user.user_id}}</td>
+                    <td>{{user.name}}</td>
+                    <td>{{user.department}}</td>
+                    <td>{{user.user_type}}</td>
+                    <td><a href="delete-user/?user_id={{user.user_id}}" onclick="delete_user('{{user.user_id}}')"><i class="far fa-trash-alt"></i></a></td>
+                </tr>
+                {% endfor %}
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+<!-- COORDINATOR ADDING MODAL -->
+<form action="add-user/" method="post">
+    {% csrf_token %}
+    <div class="modal fade" id="add_coordinator_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add User</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="u_usn">User Id:</label>
+                                <input type="text" name="user_id" value="" class="form-control" id="u_usn" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="u_name">Name:</label>
+                                <input type="text" name="user_name" value="" class="form-control" id="u_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="department">Department:</label>
+                                <select name="department" class="form-control">
+                                    <option value="Placement">Placement</option>
+                                    <option value="ISE">ISE</option>
+                                    <option value="CSE">CSE</option>
+                                    <option value="MEC">MEC</option>
+                                    <option value="ECE">ECE</option>
+                                    <option value="CIV">CIV</option>
+                                    <option value="MBA">MBA</option>
+                                    <option value="MCA">MCA</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="u_password">Password:</label>
+                                <input type="password" name="password" value="" class="form-control" id="u_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="u_typer">User Type:</label>
+                                <select name="user_type" class="form-control">
+                                    <option value="co-ordinator">Co-ordinator</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" name="upload" class="btn btn-dark" value="ADD">
+                    <button type="button" class="btn" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+{% endblock %}

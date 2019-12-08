@@ -1,0 +1,154 @@
+{% extends 'base2.html' %}
+{% block content %}
+<script>
+    function register_student_to_company(company, status) {
+        if(status != 'Registered') {
+            var res = confirm('Want to reject ?');
+            if(!res)
+                return;
+        }
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var res = this.responseText
+                document.getElementById(company+'_student_status').innerHTML = res;
+            }
+        };
+        xmlhttp.open("GET", "/student/register-to-company/?company="+company+"&status="+status, true);
+        xmlhttp.send();
+    }
+</script>
+<!-- STUDENT COMPANIES -->
+<div class="row mt-4 align-items-center">
+    <div class="col-auto">
+        <form action="/company/" method="POST">
+            {% csrf_token %}
+            <div class="input-group mb-3 border border-secondary rounded-lg">
+                <input type="text" name="company_name" class="form-control" id="myInput" placeholder="Company Name">
+                <div class="input-group-append">
+                    <button class="btn btn-dark" type="submit" disabled>Search</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="col-auto ml-auto">
+        <span class="ml-3 text-light px-3 border border-warning rounded">Not-Active </span>
+        <span class="ml-3 text-light px-3 border border-primary rounded">Active </span>
+        <span class="ml-3 text-light px-3 border border-success rounded">Finished </span>
+    </div>
+</div>
+<div class="row mb-3 text-light">
+    
+</div>
+
+<div class="row">
+    <div class="col mt-2">
+        <div id="cards">
+            {% for company_round in companies %}
+            <div class="pcard card bg-dark text-white border border-{% if '0' == company_round.company.status %}warning{% elif '1' == company_round.company.status %}success{% else %}primary{% endif %} rounded-lg">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <a class="card-link text-light" data-toggle="collapse" href="#company_{{company_round.company.id}}">
+                                <div class="" style="font-size:1.25rem;">{{company_round.company.company_name}}</div>
+                            </a>
+                        </div>
+                        <div class="col-auto ml-auto" id="{{company_round.company.id}}_student_status">
+                                {% for round in company_round.rounds %}
+                                    {% if round.next_round %}
+                                        {% if 'Not-Registered' == round.status or 'Rejected' == round.status %}
+                                            {% if company_round.registration.is_registration_open %}
+                                                <a id="" onclick="register_student_to_company('{{company_round.company.id}}', 'Registered')" class="ml-2 btn btn-dark border border-success text-success">Register</a>
+                                                <a id="" onclick="register_student_to_company('{{company_round.company.id}}', 'Rejected')" class="ml-2 btn btn-dark border border-danger text-danger">Reject</a>
+                                            {% elif company_round.registration.is_registration_not_open_yet %}
+                                                <b>Registration Not Yet Opened</b>
+                                            {% else %}
+                                                {{round.header_title}} <b>{{round.status}}</b>
+                                            {% endif %}
+                                        {% else %}
+                                            {{round.header_title}} <b>{{round.status}}</b>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div id="company_{{company_round.company.id}}" class="collapse" data-parent="#cards">
+                    <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-auto">
+                                <div>Venue : <ul><b>{{company_round.company.venue}}</b></ul>
+                                </div>
+                                <div>Date of Visit : <ul><b>{{company_round.company.date_of_visit}}</b></ul>
+                                </div>
+                            </div>
+                            <div class="col-auto border border-right-0 border-top-0 border-bottom-0 border-secondary">
+                                Package : <ul><b>{{company_round.company.package}}</b></ul>
+                                Aggregate : <ul><b>({{company_round.company.min_SSLC_percentage}}%, {{company_round.company.min_PUC_percentage}}%,
+                                        {{company_round.company.min_CGPA}})
+                                        <br />To<br />
+                                        ({{company_round.company.max_SSLC_percentage}}%, {{company_round.company.max_PUC_percentage}}%,
+                                        {{company_round.company.max_CGPA}})</b></ul>
+                            </div>
+                            <div class="col-auto border border-right-0 border-top-0 border-bottom-0 border-secondary">
+                                <div class="row">
+                                    <div class="col"> Rounds : <b>
+                                            <ul>
+                                                {% for round in company_round.rounds %}
+                                                <li>{{round.title}} - {{round.date}}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </b>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col"> Registration Timings : <b>
+                                            <ul>
+                                                {{company_round.registration.start_time}} - {{company_round.registration.end_time}}
+                                            </ul>
+                                        </b>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            
+                            <div class="w-100 mt-1"></div>
+                            <div class="col mt-1">
+                                <div id="accordion">
+                                    <div class="card bg-dark border">
+                                        <div class="card-header">
+                                            <a class="card-link text-light" data-toggle="collapse"
+                                                href="#description_{{company_round.company.id}}">
+                                                Job Description
+                                            </a>
+                                        </div>
+                                        <div id="description_{{company_round.company.id}}" class="collapse"
+                                            data-parent="#accordion">
+                                            <div class="card-body">
+                                                <pre class="text-white">{{company_round.company.description}}</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        $("#myInput").on("keyup", function () {
+            var value = $(this).val().toLowerCase();
+            $("#cards .pcard").filter(function () {
+                $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+            });
+        });
+    });
+</script>
+{% endblock %}

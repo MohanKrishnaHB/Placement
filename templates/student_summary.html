@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .chart {
+        width: 100%;
+        min-height: 300px;
+    }
+</style>
+    
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', { 'packages': ['bar'] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+            ['Round', 'Pass percentage'],
+            ['Aptitude', {{stats.aptitude.pass_percentage}}],
+            ['Discussion', {{stats.discussion.pass_percentage}}],
+            ['Technical', {{stats.technical.pass_percentage}}],
+            ['Interview', {{stats.interview.pass_percentage}}],
+        ]);
+
+        var options = {
+            chart: {
+                title: '{{student.USN.name}}\'s Performance',
+                subtitle: 'Each Round Pass Percentage',
+
+            },
+            hAxis: {
+                textStyle: {
+                    color: 'white'
+                },
+                titleTextStyle: {
+                    color: 'white'
+                }
+            },
+            vAxis: {
+                textStyle: {
+                    color: 'white'
+                },
+                titleTextStyle: {
+                    color: 'white'
+                },
+                format: 'percent',
+                viewWindowMode:'explicit',
+                viewWindow: {
+                    max:1,
+                    min:0
+                }
+            },
+            titleTextStyle: {
+                color: "#FFFFFF",    // any HTML string color ('red', '#cc00cc')
+                //fontName: <string>, // i.e. 'Times New Roman'
+                //fontSize: <number>, // 12, 18 whatever you want (don't specify px)
+                //bold: <boolean>,    // true or false
+                //italic: <boolean>   // true of false
+            },
+            backgroundColor: '#343a40',
+            //chartArea: { 'width': '100%', 'height': '80%' },
+            'legend': { 'position': 'none', textStyle: { color: 'white' } },
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+
+    }
+    $(window).resize(function(){
+        drawChart();
+    });
+
+</script>
+
+
+<!-- STUDENT DETAILS -->
+<div class="row mt-4 mx-1 text-light border border-light p-3 justify-content-between">
+    <div class="col text-center border border-right-0 border-left-0 border-top-0 border-secondary">
+        <h3>{{student.USN.name}}</h3>
+    </div>
+    <div class="w-100 mb-2"></div>
+    <div class="col-auto">
+        USN : <b>{{student.USN.USN}}</b><br />
+        Name : <b>{{student.USN.name}}</b><br />
+        Branch : <b>{{student.USN.department}}</b><br />
+    </div>
+    <div class="col-auto border border-right-0 border-bottom-0 border-top-0 border-secondary">
+        Email : <b>{{student.USN.email}}</b><br />
+        Phone No. : <b>{{student.USN.phone}}</b><br />
+        Date of Birth : <b>{{student.USN.date_of_birth}}</b><br />
+        Gender : <b>{{student.USN.gender}}</b><br />
+    </div>
+    <div class="col-auto border border-right-0 border-bottom-0 border-top-0 border-secondary">
+        SSLC : <b>{{student.SSLC_percentage}}%</b><br />
+        {{student.PUC_or_diploma}} : 
+        <b>{{student.PUC_or_diploma_percentage}}%</b><br />
+        {% if student.BCA_percentage %}
+        BCA : <b>{{student.BCA_percentage}}</b><br />
+        {% endif %}
+        {% if student.BBA_or_BCOM_percentage %}
+            {{ student.BBA_or_BCOM }} : <b>{{ student.BBA_or_BCOM_percentage }}</b><br />
+        {% endif %}
+        {% if 'MCA' == student.USN.department %}MCA{% elif 'MBA' == student.USN.department %}MBA ({{student.Finance_or_Management}}){% else %}BE{% endif %} : 
+        <b>{{student.CGPA}} CGPA</b><br />
+    </div>
+    <div class="col-auto border border-right-0 border-bottom-0 border-top-0 border-light">
+        Eligible for Companies : <b>{{student.eligible}}</b><br />
+        Attended Companies : <b>{{student.attended}}</b><br />
+        Placed Companies : <b>{{student.placed}}</b><br />
+
+    </div>
+</div>
+
+<!-- STUDENT PERFORMANCE GRAPH -->
+<div class="row mt-4 mx-1 text-light justify-content-center">
+    <div class="col-9">
+        <!--Div that will hold the pie chart-->
+        <div class="p-3 border chart" id="columnchart_material"></div>
+    </div>
+    <div class="col-3 border text-center">
+        <div class="mt-2 border border-secondary">
+            <h4>{{stats.aptitude.cleared}}<span class="text-white-50">/{{stats.aptitude.attended}}</span></h4>
+            Aptitude
+        </div>
+        <div class="mt-2 border border-secondary">
+            <h4>{{stats.discussion.cleared}}<span class="text-white-50">/{{stats.discussion.attended}}</span></h4>
+            Discussion
+        </div>
+        <div class="mt-2 border border-secondary">
+            <h4>{{stats.technical.cleared}}<span class="text-white-50">/{{stats.technical.attended}}</span></h4>
+            Technical
+        </div>
+        <div class="mt-2 border border-secondary">
+            <h4>{{stats.interview.cleared}}<span class="text-white-50">/{{stats.interview.attended}}</span></h4>
+            Interviews
+        </div>
+                    
+    </div>           
+</div>
+
+<!-- STUDENT COMPANIES -->
+
+<div class="row mx-1 my-4 border border-light pt-3">
+    <div class="col">
+        <h3 class="mb-2 text-center text-light">Eligible Companies</h3>
+    </div>
+    <div class="w-100"></div>
+    <div class="col mt-2">
+        <div id="cards">
+            {% for company_round in companies %}
+            <div class="pcard card bg-dark text-white border border-{% if '0' == company_round.company.status %}warning{% elif '1' == company_round.company.status %}success{% else %}primary{% endif %} rounded-lg">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col">
+                            <a class="card-link text-light" data-toggle="collapse" href="#company_{{company_round.company.id}}">
+                                <div class="" style="font-size:1.25rem;">{{company_round.company.company_name}}</div>
+                            </a>
+                        </div>
+                        <div class="col-auto ml-auto">
+                            {% for round in company_round.rounds %}
+                                {% if round.next_round %}{{round.header_title}} <b>{{round.status}}</b>{% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div id="company_{{company_round.company.id}}" class="collapse" data-parent="#cards">
+                    <div class="card-body">
+
+                        <div class="row">
+                            <div class="col-auto">
+                                <div>Venue : <ul><b>{{company_round.company.venue}}</b></ul>
+                                </div>
+                                <div>Date of Visit : <ul><b>{{company_round.company.date_of_visit}}</b></ul>
+                                </div>
+                            </div>
+                            <div class="col-auto border border-right-0 border-top-0 border-bottom-0 border-secondary">
+                                Package : <ul><b>{{company_round.company.package}}</b></ul>
+                                Aggregate : <ul><b>({{company_round.company.min_SSLC_percentage}}%, {{company_round.company.min_PUC_percentage}}%,
+                                        {{company_round.company.min_CGPA}})
+                                        <br />To<br />
+                                        ({{company_round.company.max_SSLC_percentage}}%, {{company_round.company.max_PUC_percentage}}%,
+                                        {{company_round.company.max_CGPA}})</b></ul>
+                            </div>
+                            <div class="col-auto border border-right-0 border-top-0 border-bottom-0 border-secondary">
+                                <div class="row">
+                                    <div class="col"> Rounds : <b>
+                                            <ul>
+                                                {% for round in company_round.rounds %}
+                                                <li>{{round.title}} - {{round.date}}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        </b>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="w-100 mt-1"></div>
+                            <div class="col mt-1">
+                                <div id="accordion">
+                                    <div class="card bg-dark border">
+                                        <div class="card-header">
+                                            <a class="card-link text-light" data-toggle="collapse"
+                                                href="#description_{{company_round.company.id}}">
+                                                Job Description
+                                            </a>
+                                        </div>
+                                        <div id="description_{{company_round.company.id}}" class="collapse"
+                                            data-parent="#accordion">
+                                            <div class="card-body">
+                                                <pre class="text-white">{{company_round.company.description}}</pre>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

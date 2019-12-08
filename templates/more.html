@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% block content %}
+<script>
+    function change_permission(permission_number, status) {
+        if(status)
+            status = 'True';
+        else
+            status = 'False';
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.onreadystatechange = function () {
+            if (this.readyState == 4 && this.status == 200) {
+                var res = this.responseText;
+            }
+        };
+        xmlhttp.open("GET", "/users/change-permission?permission_number="+permission_number+"&status="+status, true);
+        xmlhttp.send();
+    }
+</script>
+<script>
+    function delete_user(user) {
+        choice = confirm('Want to delete ' + user + ' ?')
+        if (choice == false) {
+            event.preventDefault()
+        }
+    }
+</script>
+
+<div class="container my-3 px-md-5 text-light">
+    <div class="row border p-3">
+        <div class="col border border-right-0 border-left-0 border-top-0">
+            <h4>Users</h4>
+        </div>
+        <div class="col-auto pb-1 ml-auto border border-right-0 border-left-0 border-top-0">
+            <a href="#" class="btn btn-dark border border-secondary" data-toggle="modal" data-target="#add_coordinator_modal">Add</a>
+        </div>
+        <div class="w-100"></div>
+        <div class="col">
+            {% if users %}
+            <div class="row mt-4 mx-lg-5">
+                <div class="col">
+                    <table class="table table-dark table-hover table-bordered shadow">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>NAME</th>
+                                <th>Branch</th>
+                                <th>User Type</th>
+                                <th>Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{user.user_id}}</td>
+                                <td>{{user.name}}</td>
+                                <td>{{user.department}}</td>
+                                <td>{{user.user_type}}</td>
+                                <td><a href="delete-user/?user_id={{user.user_id}}" onclick="delete_user('{{user.user_id}}')"><i class="far fa-trash-alt"></i></a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container my-3 px-md-5 text-light">
+    <div class="row border p-3">
+        <div class="col border border-right-0 border-left-0 border-top-0">
+            <h4>Permissions</h4>
+        </div>
+        <div class="w-100"></div>
+        <div class="col">
+            <div class="row my-4 p-4 shadow-lg justify-content-between align-items-center">
+                <div class="col-11">
+                    <h5>Coordinators can edit Student details</h5>
+                </div>
+                <div class="col-1">
+                    <form>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" onclick="change_permission('1', this.checked)" id="coordinators_edit_student_details" name="coordinators_edit_student_details" {% if permission.coordinator_edit_student_details %} checked {% endif %}>
+                            <label class="custom-control-label" for="coordinators_edit_student_details"></label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row my-4 p-4 shadow-lg justify-content-between align-items-center">
+                <div class="col-11">
+                    <h5>Students can edit Their details</h5>
+                </div>
+                <div class="col-1">
+                    <form>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" onclick="change_permission('2', this.checked)" id="students_edit_their_details" name="students_edit_their_details" {% if permission.students_edit_their_details %} checked {% endif %}>
+                            <label class="custom-control-label" for="students_edit_their_details"></label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row my-4 p-4 shadow-lg justify-content-between align-items-center">
+                <div class="col-11">
+                    <h5>Coordinators can make Students eligible to a company</h5>
+                </div>
+                <div class="col-1">
+                    <form>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" onclick="change_permission('3', this.checked)" id="coordinators_add_student_to_company" name="coordinators_add_student_to_company" {% if permission.add_students_to_company %} checked {% endif %}>
+                            <label class="custom-control-label" for="coordinators_add_student_to_company"></label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row mt-4 p-4 shadow-lg justify-content-between align-items-center">
+                <div class="col-11">
+                    <h5>Registration Open</h5>
+                </div>
+                <div class="col-1">
+                    <form>
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" onclick="change_permission('4', this.checked)" id="registration_open" name="registration_open" {% if permission.registration_open %} checked {% endif %}>
+                            <label class="custom-control-label" for="registration_open"></label>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container my-3 px-md-5 text-light">
+    <div class="row border p-3">
+        <div class="col border border-right-0 border-left-0 border-top-0">
+            <h4>More</h4>
+        </div>
+        <div class="w-100"></div>
+        <div class="col">
+            <div class="row mt-4 p-4 shadow-lg justify-content-between align-items-center">
+                <div class="col">
+                    <h5>Final Report of finished companies</h5>
+                </div>
+                <div class="col text-right">
+                    <a href="/activity/final-report/" class="btn btn-dark border border-secondary">Download</a>
+                </div>
+            </div>
+            <div class="row mt-4 p-4 shadow-lg justify-content-between align-items-center">
+                <div class="col">
+                    <h5>Arichive</h5>
+                </div>
+                <div class="col text-right">
+                    <a href="#" class="btn btn-dark border border-secondary">Archive</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    
+<!-- COORDINATOR ADDING MODAL -->
+<form action="/users/add-user/" method="post">
+    {% csrf_token %}
+    <div class="modal fade" id="add_coordinator_modal" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Add User</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="u_usn">User Id:</label>
+                                <input type="text" name="user_id" value="" class="form-control" id="u_usn" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="u_name">Name:</label>
+                                <input type="text" name="user_name" value="" class="form-control" id="u_name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="department">Department:</label>
+                                <select name="department" class="form-control">
+                                    <option value="Placement">Placement</option>
+                                    <option value="ISE">ISE</option>
+                                    <option value="CSE">CSE</option>
+                                    <option value="MEC">MEC</option>
+                                    <option value="ECE">ECE</option>
+                                    <option value="CIV">CIV</option>
+                                    <option value="MBA">MBA</option>
+                                    <option value="MCA">MCA</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="u_password">Password:</label>
+                                <input type="password" name="password" value="" class="form-control" id="u_password" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="u_typer">User Type:</label>
+                                <select name="user_type" class="form-control">
+                                    <option value="co-ordinator">Co-ordinator</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="submit" name="upload" class="btn btn-dark" value="ADD">
+                    <button type="button" class="btn" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+
+{% endblock %}

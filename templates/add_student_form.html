@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+</head>
+
+<body class="bg-dark">
+    <div class="container">
+        <div class="row mt-4 justify-content-center">
+            <div class="col-auto">
+                <h2 class="text-light">MITM | Placement</h2>
+            </div>
+        </div>
+        <div class="row mt-4 justify-content-center">
+            <div class="col p-3 border border-secondary rounded">
+                <h2 class="text-light text-center pb-3 border border-secondary border-top-0 border-left-0 border-right-0 rounded"> Registeration Form</h2>
+                <form action="/student/register/" method="POSt">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label class="text-light" for="USN">USN:</label>
+                        <input type="text" class="form-control" id="USN" placeholder="Enter USN" name="USN" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-light" for="name">Name:</label>
+                        <input type="text" class="form-control" id="name" placeholder="Enter Name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-light" for="department">Department:</label>
+                        <select name="department" class="form-control" id="department">
+                            <option value="ISE">ISE</option>
+                            <option value="CSE">CSE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="CIV">CIV</option>
+                            <option value="MEC">MEC</option>
+                            <option value="MCA">MCA</option>
+                            <option value="MBA">MBA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-light" for="email">Email:</label>
+                        <input type="email" class="form-control" id="email" placeholder="Enter email" name="email"
+                        required>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-light" for="phone">Phone No.:</label>
+                        <input type="text" class="form-control" id="phone" placeholder="Enter Phone number" name="phone"
+                        required>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-light" for="date_of_birth">Date of birth:</label>
+                        <input type="date" class="form-control" id="date_of_birth" name="date_of_birth" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="text-light" for="gender">Gender:</label>
+                        <select name="gender" class="form-control" id="gender">
+                            <option vlaue="Male">Male</option>
+                            <option vlaue="Female">Female</option>
+                        </select>
+                    </div>
+                    <ul class="nav nav-tabs nav-justified" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-toggle="tab" href="#BE">BE</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#MCA">MCA</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-toggle="tab" href="#MBA">MBA</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content border border-secondary">
+                        <div id="BE" class="container tab-pane active">
+                            <br />
+                            <div class="form-group">
+                                <label class="text-light" for="sslc_percentage">SSLC Percentage:</label>
+                                <input type="number" class="form-control" id="sslc_percentage"
+                                    placeholder="Enter SSLC Percentage" name="be_sslc_percentage" step="any">
+                            </div>
+                            <div class="form-group">
+                                <label class="text-light" for="puc_or_diploma">PUC or Diploma:</label>
+                                <select name="be_puc_or_diploma" class="form-control" id="puc_or_diploma">
+                                    <option vlaue="PUC">PUC</option>
+                                    <option vlaue="Diploma">Diploma</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="text-light" for="puc_or_diploma_percentage">PUC or Diploma
+                                    Percentage:</label>
+                                <input type="number" class="form-control" id="puc_or_diploma_percentage"
+                                    placeholder="Enter PUC or Diploma Percentage" name="be_puc_or_diploma_percentage"
+                                    step="any">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-light" for="cgpa">BE CGPA:</label>
+                                <input type="number" class="form-control" id="cgpa" placeholder="Enter BE CGPA"
+                                    name="be_cgpa" step="any">
+                            </div>
+                        </div>
+                        <div id="MCA" class="container tab-pane fade">
+                            <br />
+                            <div class="form-group">
+                                <label class="text-light" for="sslc_percentage">SSLC Percentage:</label>
+                                <input type="number" class="form-control" id="sslc_percentage"
+                                    placeholder="Enter SSLC Percentage" name="mca_sslc_percentage" step="any">
+                            </div>
+                            <div class="form-group">
+                                <label class="text-light" for="puc_or_diploma">PUC or Diploma:</label>
+                                <select name="mca_puc_or_diploma" class="form-control" id="puc_or_diploma">
+                                    <option vlaue="PUC">PUC</option>
+                                    <option vlaue="Diploma">Diploma</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="text-light" for="puc_or_diploma_percentage">PUC or Diploma
+                                    Percentage:</label>
+                                <input type="number" class="form-control" id="puc_or_diploma_percentage"
+                                    placeholder="Enter PUC or Diploma Percentage" name="mca_puc_or_diploma_percentage"
+                                    step="any">
+                            </div>
+                            <div class="form-group">
+                                <label class="text-light" for="bca_percentage">BCA Percentage:</label>
+                                <input type="number" class="form-control" id="bca_percentage"
+                                    placeholder="Enter BCA Percentage" name="bca_percentage" step="any">
+                            </div>
+                            <div class="form-group">
+                                <label class="text-light" for="cgpa">MCA CGPA:</label>
+                                <input type="number" class="form-control" id="cgpa" placeholder="Enter MCA CGPA"
+                                    name="mca_cgpa" step="any">
+                            </div>
+                        </div>
+                        <div id="MBA" class="container tab-pane fade">
+                            <br />
+                            <div class="form-group">
+                                <label class="text-light" for="sslc_percentage">SSLC Percentage:</label>
+                                <input type="number" class="form-control" id="sslc_percentage"
+                                    placeholder="Enter SSLC Percentage" name="mba_sslc_percentage" step="any">
+                            </div>
+                            <div class="form-group">
+                                <label class="text-light" for="puc_or_diploma">PUC or Diploma:</label>
+                                <select name="mba_puc_or_diploma" class="form-control" id="puc_or_diploma">
+                                    <option vlaue="PUC">PUC</option>
+                                    <option vlaue="Diploma">Diploma</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="text-light" for="puc_or_diploma_percentage">PUC or Diploma
+                                    Percentage:</label>
+                                <input type="number" class="form-control" id="puc_or_diploma_percentage"
+                                    placeholder="Enter PUC or Diploma Percentage" name="mba_puc_or_diploma_percentage"
+                                    step="any">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-light" for="bba_or_bcom">Bachelor Degree:</label>
+                                <select name="bba_or_bcom" class="form-control" id="bba_or_bcom">
+                                    <option vlaue="BBA">BBA</option>
+                                    <option vlaue="BCOM">BCOM</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="text-light" for="finance_or_management">Finance or Management:</label>
+                                <select name="finance_or_management" class="form-control" id="finance_or_management">
+                                    <option vlaue="Finance">Finance</option>
+                                    <option vlaue="Management">Management</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                    <label class="text-light" for="bba_or_bcom_percentage">Bachelor Degree
+                                        Percentage:</label>
+                                    <input type="number" class="form-control" id="bba_or_bcom_percentage"
+                                        placeholder="Enter Bachelor Degree Percentage" name="bba_or_bcom_percentage"
+                                        step="any">
+                                </div>
+                            <div class="form-group">
+                                <label class="text-light" for="cgpa">MBA CGPA:</label>
+                                <input type="number" class="form-control" id="cgpa" placeholder="Enter MBA CGPA"
+                                    name="mba_cgpa" step="any">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2" style="color:red;">{%for message in messages %}{{ message }}{% endfor %}</div>
+                    <div class="row">
+                        <div class="col-auto ml-auto">
+                            <input type="submit" class="btn btn-dark border border-secondary" name="submit">
+                            <input type="reset" class="btn btn-light" value="Clear" /> 
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+<style>
+    .nav-link {
+        color:white;
+    }
+    .nav-link.active {
+        color:black;
+    }
+</style>
+</html>
