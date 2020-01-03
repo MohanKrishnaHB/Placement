@@ -153,26 +153,28 @@
                     <div class="card-body">
                         <div class="row">
                             <div class="col">
-                                <table class="table table-dark table-hover table-bordered table-striped" id="mytable">
-                                    <thead>
-                                        <tr>
-                                            <th>USN</th>
-                                            <th>NAME</th>
-                                            <th>Branch</th>
-                                            <th>STATUS</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for student in elegible_students %}
-                                        <tr>
-                                            <td><a style="color:white;" href="/student/student-summary/?usn={{student.student.USN}}&branch={{student.student.department}}">{{student.student.USN}}</a></td>
-                                            <td>{{student.student.name}}</td>
-                                            <td>{{student.student.department}}</td>
-                                            <td>{{student.status}}</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover table-bordered table-striped" id="mytable">
+                                        <thead>
+                                            <tr>
+                                                <th>USN</th>
+                                                <th>NAME</th>
+                                                <th>Branch</th>
+                                                <th>STATUS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for student in elegible_students %}
+                                            <tr>
+                                                <td><a style="color:white;" href="/student/student-summary/?usn={{student.student.USN}}&branch={{student.student.department}}">{{student.student.USN}}</a></td>
+                                                <td>{{student.student.name}}</td>
+                                                <td>{{student.student.department}}</td>
+                                                <td>{{student.status}}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -250,42 +252,44 @@
                         <div class="row">
                             <div class="col">
                                 {% if student_round.students|length > 0 %}
-                                <table class="table table-dark table-hover table-bordered table-striped" id="mytable">
-                                    <thead>
-                                        <tr>
-                                            <th>USN</th>
-                                            <th>NAME</th>
-                                            <th>Branch</th>
-                                            <th>STATUS</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for student in student_round.students %}
-                                        <tr>
-                                            <td><a style="color:white;" href="/student/student-summary/?usn={{student.student.USN}}&branch={{student.student.department}}">{{student.student.USN}}</a></td>
-                                            <td>{{student.student.name}}</td>
-                                            <td>{{student.student.department}}</td>
-                                            {% if '2' == student_round.round.status and user.is_admin or user.is_coordinator %}
-                                            <td>
-                                                <a id="pass_{{student.student.USN}}{{student_round.round.id}}"
-                                                    onclick="change_status('{{student.student.USN}}', '{{student_round.round.id}}', 'Pass')"
-                                                    class="ml-2 mt-1 btn btn-dark border border-success {% if 'Pass' == student.status %}text-dark bg-success disabled{% else %}text-success{% endif %}">PASS</a>
-                                                <a id="fail_{{student.student.USN}}{{student_round.round.id}}"
-                                                    onclick="change_status('{{student.student.USN}}', '{{student_round.round.id}}', 'Fail')"
-                                                    class="ml-2 mt-1 btn btn-dark border border-danger {% if 'Fail' == student.status %}text-dark bg-danger disabled{% else %}text-danger{% endif %}">FAIL</a>
-                                                <a id="not_attended_{{student.student.USN}}{{student_round.round.id}}"
-                                                    onclick="change_status('{{student.student.USN}}', '{{student_round.round.id}}', 'Not-Attended')"
-                                                    class="ml-2 mt-1 btn btn-dark border border-warning {% if 'Not-Attended' == student.status %}text-dark bg-warning disabled{% else %}text-warning{% endif %}">NOT-ATTENDED</a>
-                                                <span class="float-right"
-                                                    id="load_{{student.student.USN}}{{student_round.round.id}}"></span>
-                                            </td>
-                                            {% else %}
-                                            <td>{{student.status}}</td>
-                                            {% endif %}
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover table-bordered table-striped" id="mytable">
+                                        <thead>
+                                            <tr>
+                                                <th>USN</th>
+                                                <th>NAME</th>
+                                                <th>Branch</th>
+                                                <th>STATUS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for student in student_round.students %}
+                                            <tr>
+                                                <td><a style="color:white;" href="/student/student-summary/?usn={{student.student.USN}}&branch={{student.student.department}}">{{student.student.USN}}</a></td>
+                                                <td>{{student.student.name}}</td>
+                                                <td>{{student.student.department}}</td>
+                                                {% if '2' == student_round.round.status and user.is_admin or user.is_coordinator %}
+                                                <td>
+                                                    <a id="pass_{{student.student.USN}}{{student_round.round.id}}"
+                                                        onclick="change_status('{{student.student.USN}}', '{{student_round.round.id}}', 'Pass')"
+                                                        class="ml-2 mt-1 btn btn-dark border border-success {% if 'Pass' == student.status %}text-dark bg-success disabled{% else %}text-success{% endif %}">PASS</a>
+                                                    <a id="fail_{{student.student.USN}}{{student_round.round.id}}"
+                                                        onclick="change_status('{{student.student.USN}}', '{{student_round.round.id}}', 'Fail')"
+                                                        class="ml-2 mt-1 btn btn-dark border border-danger {% if 'Fail' == student.status %}text-dark bg-danger disabled{% else %}text-danger{% endif %}">FAIL</a>
+                                                    <a id="not_attended_{{student.student.USN}}{{student_round.round.id}}"
+                                                        onclick="change_status('{{student.student.USN}}', '{{student_round.round.id}}', 'Not-Attended')"
+                                                        class="ml-2 mt-1 btn btn-dark border border-warning {% if 'Not-Attended' == student.status %}text-dark bg-warning disabled{% else %}text-warning{% endif %}">NOT-ATTENDED</a>
+                                                    <span class="float-right"
+                                                        id="load_{{student.student.USN}}{{student_round.round.id}}"></span>
+                                                </td>
+                                                {% else %}
+                                                <td>{{student.status}}</td>
+                                                {% endif %}
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                                 {% endif %}
                             </div>
                         </div>
